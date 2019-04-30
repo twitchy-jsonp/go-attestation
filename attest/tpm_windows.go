@@ -267,13 +267,20 @@ func (k *Key) ActivateCredential(tpm *TPM, in EncryptedCredential) ([]byte, erro
 
 func (k *Key) quote12(tpm io.ReadWriter, nonce []byte) (*Quote, error) {
 	selectedPCRs := make([]int, 24)
-	for _, pcr := range selectedPCRs {
+	for pcr, _ := range selectedPCRs {
 		selectedPCRs[pcr] = pcr
 	}
 
-	sig, quote, err := tpm1.Quote(tpm, k.hnd12, nonce, selectedPCRs[:], wellKnownAuth[:])
+	sig, pcrc, err := tpm1.Quote(tpm, k.hnd12, nonce, selectedPCRs[:], wellKnownAuth[:])
 	if err != nil {
 		return nil, fmt.Errorf("Quote() failed: %v", err)
+	}
+	// Construct and return TPM_QUOTE_INFO
+	// Returning TPM_QUOTE_INFO allows us to verify the Quote at a higher resolution
+	// and matches what go-tspi returns.
+	quote, err := tpm1.NewQuoteInfo(nonce, selectedPCRs[:], pcrc)
+	if err != nil {
+		return nil, fmt.Errorf("failed to construct Quote Info: %v", err)
 	}
 	return &Quote{
 		Quote:     quote,
