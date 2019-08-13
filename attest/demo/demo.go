@@ -1,4 +1,4 @@
-// Binary client demonstrates how to build a remote attestation client.
+// Binary demo demonstrates the attestation flow.
 package main
 
 import (
@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	addr    = flag.String("addr", "http://localhost:8080", "HTTP endpoint of the attestation server.")
 	keyfile = flag.String("keyfile", "aik.json", "Path to the AIK file.")
 )
 
@@ -52,9 +51,6 @@ func main() {
 }
 
 func checkArgs() error {
-	if *addr == "" {
-		return errors.New("addr must be specified")
-	}
 	if *keyfile == "" {
 		return errors.New("keyfile must be specified")
 	}
