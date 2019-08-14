@@ -105,14 +105,13 @@ func TestVerifyQuoteTPM20(t *testing.T) {
 	keyHandle, pub, _, _, _, _, err := tpm2.CreatePrimaryEx(tpm, tpm2.HandleEndorsement, tpm2.PCRSelection{}, "", "", tpm2.Public{
 		Type:       tpm2.AlgRSA,
 		NameAlg:    tpm2.AlgSHA256,
-		Attributes: tpm2.FlagSignerDefault | tpm2.FlagNoDA,
+		Attributes: tpm2.FlagSignerDefault,
 		RSAParameters: &tpm2.RSAParams{
 			Sign: &tpm2.SigScheme{
 				Alg:  tpm2.AlgRSASSA,
 				Hash: tpm2.AlgSHA256,
 			},
 			KeyBits: 2048,
-			Modulus: big.NewInt(0),
 		},
 	})
 	if err != nil {
