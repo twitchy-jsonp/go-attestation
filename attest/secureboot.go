@@ -217,6 +217,9 @@ func ParseSecurebootState(events []Event) (*SecurebootState, error) {
 
 			case internal.EFIBootServicesDriver:
 				if !seenSeparator2 {
+					if e.digestEquals([]byte{0, 0, 0, 0}) == nil {
+						return nil, fmt.Errorf("PCR2 separator masked as Boot Services Driver at event %d", e.sequence)
+					}
 					imgLoad, err := internal.ParseEFIImageLoad(bytes.NewReader(e.Data))
 					if err != nil {
 						return nil, fmt.Errorf("failed parsing EFI image load at boot services driver event %d: %v", e.sequence, err)
@@ -226,6 +229,11 @@ func ParseSecurebootState(events []Event) (*SecurebootState, error) {
 						return nil, fmt.Errorf("failed to parse device path for driver load event %d: %v", e.sequence, err)
 					}
 					driverSources = append(driverSources, dp)
+				}
+
+			default:
+				if bytes.Equal(e.Data, []byte{0, 0, 0, 0}) && digestVerify == nil {
+					return nil, fmt.Errorf("possible masked PCR2 separator at event %d", e.sequence)
 				}
 			}
 		}
